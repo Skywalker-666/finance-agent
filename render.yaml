@@ -1,0 +1,25 @@
+# Render Blueprint for the backend API (free tier).
+# Render runs this in its own container behind its HTTPS proxy; the API is
+# public on purpose (it is a public demo) and stores no user data.
+services:
+  - type: web
+    name: finance-agent-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt && python -m app.data.generate && python -m app.ml.train
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: LLM_API_KEY
+        sync: false          # you paste the key in the Render dashboard
+      - key: LLM_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: LLM_MODEL
+        value: llama-3.3-70b-versatile
+      - key: ALLOWED_ORIGINS
+        sync: false          # e.g. https://<your-github-username>.github.io
+      - key: RATE_LIMIT_PER_MIN
+        value: "30"

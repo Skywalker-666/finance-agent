@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+backend/app/ml/categorizer.joblib
+backend/app/ml/metrics.json
+
+# Node
+node_modules/
+frontend/dist/
+
+# Secrets - never commit
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
