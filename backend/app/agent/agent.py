@@ -24,7 +24,7 @@ You answer questions about the user's own bank transactions using ONLY the tools
 Rules:
 - Always call a tool to get numbers; never invent amounts.
 - Amounts are Indian Rupees; format like Rs 12,345.
-- If a chart would help, call make_chart.
+- When the question is about a spending breakdown or a trend over time, also call make_chart.
 - Keep answers short: 2-4 sentences, then one practical tip if relevant.
 - You give general budgeting observations, not professional financial advice.
 Today is {today}. The data covers {start} to {end}."""
@@ -67,6 +67,8 @@ def _run_online(question: str, txns: list[dict], history: list[dict]) -> dict:
         msg = llm.chat(messages, tools=TOOL_SPECS)
         calls = msg.get("tool_calls") or []
         if not calls:
+            if not charts:
+                _auto_chart(question, txns, steps, charts)
             return {"answer": msg.get("content") or "", "steps": steps, "charts": charts, "mode": "llm"}
         messages.append({"role": "assistant", "content": msg.get("content") or "", "tool_calls": calls})
         for call in calls:
@@ -82,6 +84,29 @@ def _run_online(question: str, txns: list[dict], history: list[dict]) -> dict:
             messages.append({"role": "tool", "tool_call_id": call["id"], "content": json.dumps(result)})
     return {"answer": "I needed too many steps for that one. Try a more specific question.",
             "steps": steps, "charts": charts, "mode": "llm"}
+
+
+TREND_WORDS = ("month", "trend", "over time")
+BREAKDOWN_WORDS = ("most", "breakdown", "category", "categories", "where did", "spend", "spent")
+
+
+def _auto_chart(question: str, txns: list[dict], steps: list[dict], charts: list[dict]) -> None:
+    """LLMs often skip make_chart. For breakdown/trend questions, add the chart ourselves
+    so the UI is consistent. Shown as a normal tool step, so it stays transparent."""
+    q = question.lower()
+    if any(w in q for w in TREND_WORDS):
+        args: dict = {"kind": "by_month"}
+        cat = _find_category(q)
+        if cat:
+            args["category"] = cat
+    elif any(w in q for w in BREAKDOWN_WORDS) and not any(w in q for w in ("afford", "buy", "purchase")):
+        args = {"kind": "by_category"}
+    else:
+        return
+    result = run_tool("make_chart", args, txns)
+    if "chart" in result:
+        charts.append(result["chart"])
+        steps.append(_step("make_chart", args, result))
 
 
 def _find_category(q: str) -> str | None:

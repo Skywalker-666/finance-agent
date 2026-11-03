@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "../api";
 import type { ChatMessage, Transaction } from "../types";
 import ChartView from "./ChartView";
+import Markdown from "./Markdown";
 
 const SUGGESTIONS = [
   "Where did I spend the most?",
@@ -54,7 +55,7 @@ export default function ChatPanel({ txns }: { txns: Transaction[] }) {
         )}
         {messages.map((m, i) => (
           <div key={i} className={`msg ${m.role}`}>
-            <p>{m.content}</p>
+            {m.role === "assistant" ? <Markdown text={m.content} /> : <p>{m.content}</p>}
             {m.steps && m.steps.length > 0 && (
               <details className="steps">
                 <summary>
