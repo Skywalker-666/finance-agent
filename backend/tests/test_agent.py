@@ -99,3 +99,33 @@ def test_sample_covers_last_six_full_months():
     months = sorted({t["date"][:7] for t in make_sample_statement()})
     last = _add_months(date.today().replace(day=1), -1)
     assert len(months) == 6 and months[-1] == last.isoformat()[:7]
+
+
+def _fake_llm(monkeypatch, tool: str):
+    monkeypatch.setenv("LLM_API_KEY", "test")
+    replies = iter([
+        {"content": "", "tool_calls": [{"id": "c1", "type": "function", "function": {
+            "name": tool, "arguments": "{}"}}]},
+        {"content": "Done."},
+    ])
+    monkeypatch.setattr(llm, "chat", lambda messages, tools=None, timeout=30.0: next(replies))
+
+
+def test_online_adds_chart_when_llm_skips_it(txns, monkeypatch):
+    _fake_llm(monkeypatch, "top_merchants")
+    r = agent.run_agent("Where did I spend the most?", txns)
+    assert r["charts"] and r["charts"][0]["type"] == "pie"
+    assert r["steps"][-1]["tool"] == "make_chart"  # visible, not hidden
+
+
+def test_online_trend_question_gets_monthly_chart(txns, monkeypatch):
+    _fake_llm(monkeypatch, "spending_summary")
+    r = agent.run_agent("How is my food spending trending by month?", txns)
+    assert r["charts"][0]["type"] == "bar"
+    assert r["steps"][-1]["args"] == {"kind": "by_month", "category": "Food & Dining"}
+
+
+def test_online_affordability_gets_no_chart(txns, monkeypatch):
+    _fake_llm(monkeypatch, "forecast")
+    r = agent.run_agent("Can I afford to spend 15000 on a trip?", txns)
+    assert r["charts"] == []
