@@ -3,7 +3,7 @@
 Configured by environment variables, never hard-coded:
   LLM_API_KEY   - required for online mode (kept server-side only)
   LLM_BASE_URL  - default: Groq's OpenAI-compatible endpoint
-  LLM_MODEL     - default: llama-3.3-70b-versatile
+  LLM_MODEL     - default: openai/gpt-oss-120b
 """
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import os
 import httpx
 
 DEFAULT_BASE_URL = "https://api.groq.com/openai/v1"
-DEFAULT_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_MODEL = "openai/gpt-oss-120b"
 
 
 class LLMError(RuntimeError):

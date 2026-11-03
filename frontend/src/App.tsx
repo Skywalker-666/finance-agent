@@ -18,7 +18,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!txns.length) return setForecast(null);
+    if (!txns.length) {
+      setForecast(null);
+      return;
+    }
     api.forecast(txns).then(setForecast).catch(() => setForecast(null));
   }, [txns]);
 
