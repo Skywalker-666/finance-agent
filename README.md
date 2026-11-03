@@ -4,7 +4,9 @@ An AI agent that reads your bank statement, categorizes every transaction with a
 model it trained itself, forecasts next month's spending, and answers questions
 like *"Can I afford a ₹15,000 trip?"* by calling tools over your data.
 
-**Live demo:** `https://<your-username>.github.io/finance-agent/` · **API:** `https://<your-render-app>.onrender.com/api/health`
+**🚀 Live demo: [skywalker-666.github.io/finance-agent](https://skywalker-666.github.io/finance-agent/)** · API health: [finance-agent-api-biad.onrender.com/api/health](https://finance-agent-api-biad.onrender.com/api/health)
+
+> The backend runs on Render's free tier and sleeps when idle, so the first request can take 30-50 seconds. Click **Load sample data**, then ask the agent a question.
 
 ## What it shows
 
