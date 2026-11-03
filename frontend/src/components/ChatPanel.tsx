@@ -16,7 +16,11 @@ export default function ChatPanel({ txns }: { txns: Transaction[] }) {
   const [busy, setBusy] = useState(false);
   const end = useRef<HTMLDivElement>(null);
 
-  useEffect(() => end.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), [messages]);
+  // Braces matter: newer browsers return a Promise from scrollIntoView, and React
+  // would treat a returned value as the effect's cleanup function and crash.
+  useEffect(() => {
+    end.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [messages]);
 
   async function send(text: string) {
     const q = text.trim();

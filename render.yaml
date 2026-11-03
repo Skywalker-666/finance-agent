@@ -18,7 +18,7 @@ services:
       - key: LLM_BASE_URL
         value: https://api.groq.com/openai/v1
       - key: LLM_MODEL
-        value: llama-3.3-70b-versatile
+        value: openai/gpt-oss-120b
       - key: ALLOWED_ORIGINS
         sync: false          # e.g. https://<your-github-username>.github.io
       - key: RATE_LIMIT_PER_MIN
